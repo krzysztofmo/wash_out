@@ -1,11 +1,12 @@
 require 'httpi'
+require 'httpi/adapter/base'
 require 'httpi/response'
 
 module HTTPI
-  module Adapters
-    # This is an adapter for testing the Rack applications with HTTPI-capable
-    # clients.
-    class Rack
+  module Adapter
+    class Rack < Base
+      register :rack, :deps => %w(rack/mock)
+
       class << self
         attr_accessor :mounted_apps
       end
@@ -16,31 +17,27 @@ module HTTPI
         self.mounted_apps[host] = application
       end
 
-      def initialize(request=nil)
+      def initialize(request)
+        @request = request
+        @app     = self.class.mounted_apps[@request.url.host]
+        @client  = ::Rack::MockRequest.new(@app)
       end
 
-      def method_missing(method, *args)
+      def request(method)
         if %w{get post head put delete}.include?(method.to_s)
-          request, = args
-
-          app = self.class.mounted_apps[request.url.host]
-          mock_req = ::Rack::MockRequest.new(app)
-
           env = {}
-          request.headers.each do |header, value|
+          @request.headers.each do |header, value|
             env["HTTP_#{header.gsub('-', '_').upcase}"] = value
           end
 
-          mock_resp = mock_req.request(method.to_s.upcase, request.url.to_s,
-                { :fatal => true, :input => request.body.to_s }.merge(env))
+          response = @client.request(method.to_s.upcase, @request.url.to_s,
+                { :fatal => true, :input => @request.body.to_s }.merge(env))
 
-          HTTPI::Response.new(mock_resp.status, mock_resp.headers, mock_resp.body)
+          Response.new(response.status, response.headers, response.body)
         else
-          super
+          raise "Method `#{method.to_s}' is not supported by HTTPI rack adapter"
         end
       end
     end
   end
-
-  Adapter::ADAPTERS[:rack] = { :class => Adapters::Rack, :require => 'rack/mock' }
 end

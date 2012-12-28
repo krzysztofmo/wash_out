@@ -28,14 +28,10 @@ end
 
 require 'savon'
 
-Savon.configure do |config|
-  config.log = false            # disable logging
-end
-
-HTTPI.logger = Logger.new(open("/dev/null", 'w'))
+HTTPI.logger  = Logger.new(open("/dev/null", 'w'))
 HTTPI.adapter = :rack
 
-HTTPI::Adapters::Rack.mount 'app', Dummy::Application
+HTTPI::Adapter::Rack.mount 'app', Dummy::Application
 
 Dummy::Application.routes.draw do
   wash_out :api
@@ -43,7 +39,8 @@ end
 
 def client
   Savon::Client.new do
-    wsdl.document = 'http://app/api/wsdl'
+    log  false
+    wsdl 'http://app/api/wsdl'
   end
 end
 
