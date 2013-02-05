@@ -1,14 +1,15 @@
 GIT
-  remote: git://github.com/savonrb/httpi.git
-  revision: 6536d498160ecb0e969bb161ad091c49493f6bc2
+  remote: https://github.com/savonrb/httpi.git
+  revision: 6014a1a1c9c1a9b8ac91102ea36cb2667a133c89
   specs:
-    httpi (2.0.0)
+    httpi (2.0.2)
       rack
+      rubyntlm
 
 PATH
   remote: .
   specs:
-    wash_out (0.6.0)
+    wash_out (0.6.1)
       nori (~> 2.0.0)
 
 GEM
@@ -104,6 +105,7 @@ GEM
       rspec-core (~> 2.12.0)
       rspec-expectations (~> 2.12.0)
       rspec-mocks (~> 2.12.0)
+    rubyntlm (0.1.1)
     savon (2.0.2)
       akami (~> 1.2.0)
       builder (>= 2.1.2)
